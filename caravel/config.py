@@ -130,7 +130,7 @@ IMG_UPLOAD_URL = '/static/uploads/'
 # IMG_SIZE = (300, 200, True)
 
 CACHE_DEFAULT_TIMEOUT = None
-CACHE_CONFIG = {'CACHE_TYPE': 'null'}
+CACHE_CONFIG = {'CACHE_TYPE': 'simple'}
 
 
 # ---------------------------------------------------

@@ -245,6 +245,8 @@ class BaseViz(object):
 
     def get_json(self):
         """Handles caching around the json payload retrieval"""
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print(self.get_url(json="true", force="false"))
         cache_key = self.cache_key
         payload = None
         if self.form_data.get('force') != 'true':
