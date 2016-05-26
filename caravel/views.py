@@ -31,6 +31,7 @@ from wtforms.validators import ValidationError
 
 from caravel import appbuilder, db, models, viz, utils, app, sm, ascii_art, cache
 from caravel.viz import viz_types
+from caravel import aps
 
 config = app.config
 log_this = models.Log.log_this
@@ -57,7 +58,6 @@ class FilterSlice(CaravelFilter):
         if any([r.name in ('Admin', 'Alpha') for r in get_user_roles()]):
             return query
         qry = query.filter(self.model.perm.in_(self.get_perms()))
-        print(qry)
         return qry
 
 
@@ -758,48 +758,51 @@ class Caravel(BaseView):
         return redirect(slc.slice_url)
 
 
-    def _cron_job(self, slice_id):
-        slc = (
-            db.session.query(models.Slice)
-            .filter_by(id=slice_id)
-            .first()
-        )
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        datasource_type = slc.datasource_type
-        datasource_id = slc.table_id
-        print(datasource_id)
-        datasource_class = models.SqlaTable \
-            if datasource_type == "table" else models.DruidDatasource
-        datasources = (
-            db.session
-            .query(datasource_class)
-            .all()
-        )
-        datasources = sorted(datasources, key=lambda ds: ds.full_name)
-        datasource = [ds for ds in datasources if int(datasource_id) == ds.id]
-        datasource = datasource[0] if datasource else None
+    # def _cron_job(self, slice_id):
+    #     slc = (
+    #         db.session.query(models.Slice)
+    #         .filter_by(id=slice_id)
+    #         .first()
+    #     )
+    #     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    #     datasource_type = slc.datasource_type
+    #     datasource_id = slc.table_id
+    #     datasource_class = models.SqlaTable \
+    #         if datasource_type == "table" else models.DruidDatasource
+    #     datasources = (
+    #         db.session
+    #         .query(datasource_class)
+    #         .all()
+    #     )
+    #     datasources = sorted(datasources, key=lambda ds: ds.full_name)
+    #     datasource = [ds for ds in datasources if int(datasource_id) == ds.id]
+    #     datasource = datasource[0] if datasource else None
         
-        d = json.loads(slc.params)
-        viz_class = viz_types[slc.viz_type]
-        sliceView = viz_class(datasource, form_data=d)
-        print(dir(sliceView))
-        cache_timeout = 1000
-        payload = {
-            'cache_timeout': cache_timeout,
-            'cache_key': sliceView.cache_key,
-            'csv_endpoint': sliceView.csv_endpoint,
-            'data': sliceView.get_data(),
-            'form_data': sliceView.form_data,
-            'json_endpoint': sliceView.json_endpoint,
-            'query': sliceView.query,
-            'standalone_endpoint': sliceView.standalone_endpoint,
-        }
-        payload['cached_dttm'] = datetime.now().isoformat().split('.')[0]
-        logging.info("Caching for the next {} seconds".format(
-            cache_timeout))
-        print(sliceView.cache_key)
-        cache.set(sliceView.cache_key, payload, timeout=cache_timeout)
-        print(sliceView.get_url(json="true", force="false"))
+    #     d = json.loads(slc.params)
+    #     viz_class = viz_types[slc.viz_type]
+    #     sliceView = viz_class(datasource, form_data=d)
+    #     print("========sliceview==========")
+    #     print(dir(sliceView))
+    #     print("========sliceview==========")
+    #     cache_timeout = 1000
+    #     payload = {
+    #         'cache_timeout': cache_timeout,
+    #         'cache_key': sliceView.cache_key,
+    #         'csv_endpoint': sliceView.csv_endpoint,
+    #         'data': sliceView.get_data(),
+    #         'form_data': sliceView.form_data,
+    #         'json_endpoint': sliceView.json_endpoint,
+    #         'query': sliceView.query,
+    #         'standalone_endpoint': sliceView.standalone_endpoint,
+    #     }
+    #     payload['cached_dttm'] = datetime.now().isoformat().split('.')[0]
+    #     logging.info("Caching for the next {} seconds".format(
+    #         cache_timeout))
+    #     print("===============print slice cache_key==========")
+    #     print(sliceView.cache_key)
+    #     cache.set(sliceView.cache_key, payload, timeout=cache_timeout)
+    #     print(sliceView.get_url(json="true", force="false"))
+    #     print("===============print slice url==========")
         
         
     def save_slice(self, slc):
@@ -808,7 +811,8 @@ class Caravel(BaseView):
         session.add(slc)
         session.commit()
         flash(msg, "info")
-        self._cron_job('1')
+        aps.add('31')
+        aps.add('32')
 
     def overwrite_slice(self, slc):
         session = db.session()

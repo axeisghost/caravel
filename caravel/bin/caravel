@@ -13,7 +13,7 @@ from flask.ext.migrate import MigrateCommand
 from flask.ext.script import Manager
 
 import caravel
-from caravel import app, ascii_art, db, data, utils
+from caravel import app, ascii_art, db, data, utils, aps
 
 config = app.config
 
@@ -37,6 +37,7 @@ def runserver(debug, port, timeout, workers):
     """Starts a Caravel web server"""
     debug = debug or config.get("DEBUG")
     if debug:
+        aps.init_aps()
         app.run(
             host='0.0.0.0',
             port=int(port),

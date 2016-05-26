@@ -51,6 +51,9 @@ class BaseViz(object):
 
     def __init__(self, datasource, form_data, slice_=None):
         self.orig_form_data = form_data
+        # print("++++++++++++++++++++++++++++")
+        # print(dir(form_data))
+        # print("____________________________")
         if not datasource:
             raise Exception("Viz is missing a datasource")
         self.datasource = datasource
@@ -129,6 +132,8 @@ class BaseViz(object):
                 del d[key]
             else:
                 od[key] = d[key]
+        # print("===============get_url od")
+        # print(od)
         href = Href(
             '/caravel/explore/{self.datasource.type}/'
             '{self.datasource.id}/'.format(**locals()))
@@ -245,8 +250,8 @@ class BaseViz(object):
 
     def get_json(self):
         """Handles caching around the json payload retrieval"""
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print(self.get_url(json="true", force="false"))
+        # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        # print(self.get_url(json="true", force="false"))
         cache_key = self.cache_key
         payload = None
         if self.form_data.get('force') != 'true':
@@ -305,7 +310,14 @@ class BaseViz(object):
     @property
     def cache_key(self):
         url = self.get_url(json="true", force="false")
-        return hashlib.md5(url.encode('utf-8')).hexdigest()
+        # print("====================cache_key url generation==============")
+        # print(self.form_data)
+        # return hashlib.md5(url.encode('utf-8')).hexdigest()
+        if self.form_data['slice_id']:
+            # print(self.form_data)
+            return self.form_data['slice_id']
+        else:
+            return hashlib.md5(url.encode('utf-8')).hexdigest()
 
     @property
     def csv_endpoint(self):
